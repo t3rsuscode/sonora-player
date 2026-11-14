@@ -11,19 +11,24 @@
 - Базовые операции: поток треков, поиск, вставка/замена, удаление и избранное.
 - Riverpod providers для базы и потока библиотеки.
 - Экран библиотеки подключён к потоку БД.
+- Добавлены widget/database tests.
+- Добавлен GitHub Actions workflow для сборки Android debug APK и публикации APK как artifact.
 
-## Пока не реализовано
-- Генерация app_database.g.dart и проверка компиляции в Flutter SDK.
+## Пока не реализовано / не подтверждено
+- Успешное прохождение CI и сборка APK ещё не подтверждены.
+- Генерируемый Drift-файл создаётся во время CI, но не закоммичен.
 - Фактическое сканирование MediaStore/локальных файлов.
 - Воспроизведение аудио и фоновые media controls.
-- Android/iOS platform directories и APK.
+- Android platform project генерируется в CI; постоянные Android/iOS каталоги пока не добавлены в репозиторий.
+
+## Как получить APK
+1. Открыть вкладку Actions в GitHub.
+2. Выбрать workflow **Android APK**.
+3. Нажать **Run workflow** (если автоматический запуск после push ещё не появился).
+4. После успешного завершения открыть запуск и скачать artifact `sonora-player-debug-apk`.
+5. Распаковать ZIP и установить `app-debug.apk` на Android.
+
+Это debug-сборка для тестирования, не релизная подписанная версия.
 
 ## Следующая проверка
-В среде с Flutter SDK выполнить:
-1. `flutter pub get`
-2. `dart run build_runner build --delete-conflicting-outputs`
-3. `dart format .`
-4. `flutter analyze`
-5. `flutter test`
-
-Далее реализовать Android MediaStore scanner с runtime permissions и прогрессом.
+Выполнить сборку в GitHub Actions и исправить ошибки, если они появятся. Затем реализовать Android MediaStore scanner с runtime permissions и прогрессом.
