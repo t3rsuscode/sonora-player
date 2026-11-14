@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LibraryScreen extends StatelessWidget {
+import '../../../core/database/database_provider.dart';
+
+class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tracks = ref.watch(libraryTracksProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sonora'),
@@ -21,69 +26,65 @@ class LibraryScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text('Твоя музыка', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 8),
-          Text(
-            'Локальная музыкальная библиотека будет собрана на устройстве.',
-            style: Theme.of(context).textTheme.bodyMedium,
+      body: tracks.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text('Не удалось открыть медиатеку: $error'),
           ),
-          const SizedBox(height: 24),
-          const _LibraryAction(
-            icon: Icons.folder_open,
-            title: 'Добавить музыку',
-            subtitle: 'Выбрать папку или файлы на устройстве',
-          ),
-          const SizedBox(height: 12),
-          const _LibraryAction(
-            icon: Icons.album_outlined,
-            title: 'Альбомы',
-            subtitle: 'Альбомы появятся после сканирования',
-          ),
-          const SizedBox(height: 12),
-          const _LibraryAction(
-            icon: Icons.person_outline,
-            title: 'Исполнители',
-            subtitle: 'Треки будут сгруппированы по исполнителям',
-          ),
-          const SizedBox(height: 12),
-          const _LibraryAction(
-            icon: Icons.queue_music,
-            title: 'Плейлисты',
-            subtitle: 'Создавай собственные подборки',
-          ),
-          const SizedBox(height: 28),
-          const Center(
-            child: Text('Сканирование медиатеки — следующий этап разработки.'),
-          ),
-        ],
-      ),
-    );
-  }
-}
+        ),
+        data: (items) {
+          if (items.isEmpty) {
+            return ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                Text(
+                  'Твоя музыка',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Здесь появятся аудиофайлы, добавленные в медиатеку.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 32),
+                Icon(
+                  Icons.library_music_outlined,
+                  size: 72,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                const SizedBox(height: 16),
+                const Center(child: Text('Пока нет добавленных треков')),
+                const SizedBox(height: 8),
+                const Center(
+                  child: Text('Импорт и сканирование устройства — следующий шаг.'),
+                ),
+              ],
+            );
+          }
 
-class _LibraryAction extends StatelessWidget {
-  const _LibraryAction({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: Icon(icon, size: 28),
-        title: Text(title),
-        subtitle: Text(subtitle),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {},
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final track = items[index];
+              return ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.music_note)),
+                title: Text(
+                  track.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  '${track.artist} • ${track.album}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {},
+              );
+            },
+          );
+        },
       ),
     );
   }
